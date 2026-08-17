@@ -1,44 +1,67 @@
-import { getCollection } from "astro:content";
-import { siteConfig } from "@/config/site";
-import { postHref, visiblePosts } from "@/lib/posts";
+import { loadRenderers } from "astro:container";
+import { render } from "astro:content";
+import { getContainerRenderer as getMDXRenderer } from "@astrojs/mdx/container-renderer";
+import rss, { type RSSFeedItem } from "@astrojs/rss";
+import { getContainerRenderer as getSvelteRenderer } from "@astrojs/svelte/container-renderer";
+import I18nKey from "@i18n/i18nKey";
+import { i18n } from "@i18n/translation";
+import { getSortedPosts } from "@utils/content-utils";
+import { formatDateI18nWithTime } from "@utils/date-utils";
+import { url } from "@utils/url-utils";
+import type { APIContext } from "astro";
+import { experimental_AstroContainer as AstroContainer } from "astro/container";
+import sanitizeHtml from "sanitize-html";
+import { siteConfig } from "@/config";
+import pkg from "../../package.json";
 
-const escapeXml = (value: string) =>
-  value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&apos;");
+function stripInvalidXmlChars(str: string): string {
+	return str.replace(
+		// biome-ignore lint/suspicious/noControlCharactersInRegex: https://www.w3.org/TR/xml/#charsets
+		/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F\uFDD0-\uFDEF\uFFFE\uFFFF]/g,
+		"",
+	);
+}
 
-export async function GET() {
-  const posts = visiblePosts(await getCollection("posts")).slice(0, 20);
-  const items = posts
-    .map((post) => {
-      const url = new URL(postHref(post), siteConfig.siteUrl).toString();
-      return `<item>
-  <title>${escapeXml(post.data.title)}</title>
-  <link>${url}</link>
-  <guid>${url}</guid>
-  <pubDate>${post.data.date.toUTCString()}</pubDate>
-  <description>${escapeXml(post.data.excerpt)}</description>
-</item>`;
-    })
-    .join("\n");
-
-  const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0">
-<channel>
-  <title>${escapeXml(siteConfig.name)}</title>
-  <link>${siteConfig.siteUrl}</link>
-  <description>${escapeXml(siteConfig.description)}</description>
-  <language>${escapeXml(siteConfig.language)}</language>
-${items}
-</channel>
-</rss>`;
-
-  return new Response(xml, {
-    headers: {
-      "Content-Type": "application/rss+xml; charset=utf-8",
-    },
-  });
+export async function GET(context: APIContext): Promise<Response> {
+	const blog = await getSortedPosts();
+	const renderers = await loadRenderers([
+		getMDXRenderer(),
+		getSvelteRenderer(),
+	]);
+	const container = await AstroContainer.create({ renderers });
+	const feedItems: RSSFeedItem[] = [];
+	for (const post of blog) {
+		if (post.data.password) {
+			feedItems.push({
+				title: post.data.title,
+				pubDate: post.data.published,
+				description: post.data.description || "",
+				link: url(`/posts/${post.id}/`),
+				content: i18n(I18nKey.passwordProtectedRss),
+			});
+			continue;
+		}
+		const { Content } = await render(post);
+		const rawContent = await container.renderToString(Content);
+		const cleanedContent = stripInvalidXmlChars(rawContent);
+		feedItems.push({
+			title: post.data.title,
+			pubDate: post.data.published,
+			description: post.data.description || "",
+			link: url(`/posts/${post.id}/`),
+			content: sanitizeHtml(cleanedContent, {
+				allowedTags: sanitizeHtml.defaults.allowedTags.concat(["img"]),
+			}),
+		});
+	}
+	return rss({
+		title: siteConfig.title,
+		description: siteConfig.subtitle || "No description",
+		site: context.site ?? "https://firefly.cuteleaf.cn",
+		customData: `<templateTheme>Firefly</templateTheme>
+		<templateThemeVersion>${pkg.version}</templateThemeVersion>
+		<templateThemeUrl>https://github.com/CuteLeaf/Firefly</templateThemeUrl>
+		<lastBuildDate>${formatDateI18nWithTime(new Date())}</lastBuildDate>`,
+		items: feedItems,
+	});
 }

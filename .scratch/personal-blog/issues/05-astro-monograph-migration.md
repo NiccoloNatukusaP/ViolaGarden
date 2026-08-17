@@ -1,10 +1,10 @@
-# 05 — 从 Quartz 迁移到 Astro 7 + Monograph，重建博客
+# 05 — 从 Quartz 迁移到 Astro 7 + Firefly，重建博客
 
-**What to build:** 将当前基于 Quartz v5 构建的博客完整迁移至 Astro 7 + Monograph 主题。访客打开重建后的博客，能看到清晰的首页、分类页、关于页与友链页；可浏览迁移过来的所有文章；可搜索内容、切换深/浅色模式、订阅 RSS；移动端正常阅读。作者在本地运行一次构建命令，即可得到一份可放心推送到 Cloudflare Pages 并在 natukusa.cc 上访问的静态站点。Viola Garden 视觉定制（紫白红配色 + 背景暗纹）推迟到部署后单独实现。
+**What to build:** 将当前基于 Quartz v5 构建的博客完整迁移至 Astro 7 + Firefly 主题。访客打开重建后的博客，能看到清晰的首页、分类页、关于页与友链页；可浏览迁移过来的所有文章；可搜索内容、切换深/浅色模式、订阅 RSS；移动端正常阅读。作者在本地运行一次构建命令，即可得到一份可放心推送到 Cloudflare Pages 并在 natukusa.cc 上访问的静态站点。Viola Garden 视觉定制（紫白红配色 + 背景暗纹）推迟到部署后单独实现。
 
-**Blocked by:** None — can start immediately
+**Status:** in-progress
 
-**Status:** ready-for-agent
+**Updated:** 2026-08-17 - 切换主题从 Monograph 到 Firefly
 
 ## Problem Statement
 
@@ -12,9 +12,9 @@
 
 ## Solution
 
-迁移至 **Astro 7** 框架 + **Monograph** 主题（`xocothemes/monograph`）。Astro 是内容为先的静态站点生成器，原生支持 MDX（可在 Markdown 中嵌入组件），提供灵活的布局定制能力。Monograph 是一款「text-first by design」的极简博客主题，基于 Tailwind CSS 4 tokens + cascade layers，配色系统完全可定制。采用扁平化 URL 结构（`/posts/[slug]`），通过 frontmatter 的 `category` 字段与 `tags` 字段将分类与标签分离为两个独立维度，取消 Quartz 特有的双向链接、关系图谱、文件树侧边栏等功能。文章定制通过 **frontmatter 全局开关**（如 `toc: true/false`、`cover` 封面图）与 **MDX 组件局部插入**（如 `<Callout>`、自定义时间线）两者结合实现。所有现有文章（《我爱紫百合》、《佛罗伦萨 4-1 贝内文托》等）迁移为 `.mdx` 格式，示例与占位页面舍弃。部署方式保持 **Cloudflare Pages** + **natukusa.cc** 域名不变，仅将构建命令改为 `npm run build`、输出目录改为 `dist/`。
+迁移至 **Astro 7** 框架 + **Firefly** 主题（`github.com/CuteLeaf/Firefly`）。Astro 是内容为先的静态站点生成器，原生支持 Markdown/MDX。Firefly 是基于 Fuwari 开发的功能丰富的个人博客主题，内置搜索、分类、标签、评论、相册等功能，配色系统高度可定制。采用扁平化文章结构，通过 frontmatter 的 `category` 字段与 `tags` 字段将分类与标签分离为两个独立维度，取消 Quartz 特有的双向链接、关系图谱、文件树侧边栏等功能。所有现有文章（《我爱紫百合》、《佛罗伦萨 4-1 贝内文托》等）迁移为 `.md` 格式，示例与占位页面舍弃。部署方式保持 **Cloudflare Pages** + **natukusa.cc** 域名不变，仅将构建命令改为 `npm run build`、输出目录改为 `dist/`。
 
-**Viola Garden 视觉定制**（紫色 `#7c3aed` 主导、白色 `#ffffff`、红色 `#c62839` 点缀、背景紫百合暗纹）推迟到首次部署后，作为独立 issue 实施——先确保功能可用，再优化外观。
+**Viola Garden 视觉定制**（紫色 `hue: 280` 主题色）已在配置中设置基础值，后续可通过调整 `themeColor.hue` 进一步优化。
 
 ## User Stories
 
