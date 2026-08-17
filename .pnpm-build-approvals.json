@@ -1,7 +1,0 @@
-{
-  "approvals": {
-    "esbuild@0.28.1": true,
-    "esbuild@0.28.2": true,
-    "workerd": true
-  }
-}
