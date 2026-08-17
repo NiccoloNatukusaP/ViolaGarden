@@ -1,37 +1,53 @@
 # Niccolo's Viola Garden
 
-我的个人博客 —— 记录生活、迷思与足球（ACF 佛罗伦萨 / 紫百合）。
+**紫百合花园** - 记录生活、迷思与足球的个人博客
 
-> 作者：NIccoloNatukusaP
+[![Built with Astro](https://astro.badg.es/v2/built-with-astro/tiny.svg)](https://astro.build)
 
-## 关于本站
+## 🌟 关于
 
-基于 [Quartz v5](https://quartz.jzhao.xyz/) 构建的静态站点，用 Obsidian 写作：
+这是 NIccoloNatukusaP 的个人博客，基于 [Astro](https://astro.build) 和 [Firefly](https://github.com/CuteLeaf/Firefly) 主题构建。
 
-- `content/` 目录就是 Obsidian 库，直接在 Obsidian 里写 Markdown
-- 支持双向链接、关系图谱、callout、LaTeX、mermaid 等 Obsidian 语法
-- 紫 + 白 + 红（紫百合）主题，中文本地化
-- 自带搜索、深色模式、RSS 订阅、站点地图
+博客名称"Viola Garden"（紫百合花园）源自意甲球队佛罗伦萨足球俱乐部（ACF Fiorentina）的绰号"Viola"（紫百合），象征着对这支球队的热爱。
 
-## 写作
+## 📝 内容分类
 
-用 Obsidian 把 `content/` 目录作为库打开，直接写。文章 frontmatter 用：
+- **生活** - 日常随想与生活记录
+- **迷思** - 思考、疑问与探索
+- **足球** - 佛罗伦萨足球评述与战术分析
 
-- `title` — 标题
-- `date` — 日期（`YYYY-MM-DD`）
-- `tags` — 标签（列表）
-- `description` — 摘要
-- `aliases` — 别名（可选）
-- `draft: true` — 标记草稿（构建时不发布）
+## 🚀 技术栈
 
-## 构建与预览
+- **框架**: [Astro 7](https://astro.build)
+- **主题**: [Firefly](https://github.com/CuteLeaf/Firefly)
+- **部署**: Cloudflare Pages
+- **域名**: [natukusa.cc](https://natukusa.cc)
+
+## 📦 本地开发
 
 ```bash
-npm install               # 首次安装依赖
-npx quartz build          # 生成静态站点到 public/
-npx quartz build --serve  # 本地预览
+# 安装依赖
+npm install
+
+# 启动开发服务器
+npm run dev
+
+# 构建生产版本
+npm run build
+
+# 预览构建产物
+npm run preview
 ```
 
-## 许可
+## 📄 许可
 
-本站基于 [Quartz](https://github.com/jackyzha0/quartz)（MIT License）构建；博客内容（`content/`）版权归作者本人所有。
+博客内容采用 [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) 许可。
+
+## 🔗 链接
+
+- 博客地址: https://natukusa.cc
+- GitHub: https://github.com/NiccoloNatukusaP/ViolaGarden
+
+---
+
+**Forza Viola! 💜**
