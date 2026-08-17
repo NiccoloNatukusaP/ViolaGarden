@@ -1,0 +1,48 @@
+---
+import { getCollection } from "astro:content";
+import SiteFooter from "@/components/SiteFooter.astro";
+import SiteHeader from "@/components/SiteHeader.astro";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { siteConfig } from "@/config/site";
+import { visiblePosts } from "@/lib/posts";
+
+const allPosts = visiblePosts(await getCollection("posts"));
+---
+
+<BaseLayout
+  title="友链"
+  description="我常看的博客和朋友们的站点"
+>
+  <SiteHeader posts={allPosts} />
+  <main id="content" class="outer">
+    <div class="canvas">
+      <header class="pagehead">
+        <p class="eyebrow">Friends</p>
+        <h1 class="pagehead-title">友链</h1>
+        <p class="pagehead-description">我常看的博客和朋友们的站点</p>
+      </header>
+
+      <div class="prose">
+        <p>
+          这里会列出我常看的博客和推荐的网站。目前正在整理中，欢迎交换友链。
+        </p>
+
+        <h2>足球相关</h2>
+        <p>（待添加）</p>
+
+        <h2>技术博客</h2>
+        <p>（待添加）</p>
+
+        <h2>生活随笔</h2>
+        <p>（待添加）</p>
+
+        <hr />
+
+        <p>
+          如果你想交换友链，欢迎通过 RSS 订阅或其他方式联系我。
+        </p>
+      </div>
+    </div>
+  </main>
+  <SiteFooter />
+</BaseLayout>

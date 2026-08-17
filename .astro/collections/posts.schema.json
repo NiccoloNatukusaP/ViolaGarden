@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "excerpt": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "生活",
+        "迷思",
+        "足球"
+      ]
+    },
+    "date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updatedDate": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "author": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "role": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "role"
+      ]
+    },
+    "cover": {
+      "type": "object",
+      "properties": {
+        "src": {
+          "type": "string"
+        },
+        "alt": {
+          "type": "string"
+        },
+        "creditName": {
+          "type": "string"
+        },
+        "creditUrl": {
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "required": [
+        "src",
+        "alt"
+      ]
+    },
+    "featured": {
+      "default": false,
+      "type": "boolean"
+    },
+    "draft": {
+      "default": false,
+      "type": "boolean"
+    },
+    "$schema": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "title",
+    "excerpt",
+    "category",
+    "date",
+    "author"
+  ]
+}

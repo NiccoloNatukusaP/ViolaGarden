@@ -1,0 +1,59 @@
+---
+import { getCollection } from "astro:content";
+import SiteFooter from "@/components/SiteFooter.astro";
+import SiteHeader from "@/components/SiteHeader.astro";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { siteConfig } from "@/config/site";
+import { visiblePosts } from "@/lib/posts";
+
+const allPosts = visiblePosts(await getCollection("posts"));
+---
+
+<BaseLayout
+  title="关于"
+  description={`关于 ${siteConfig.name} — 了解作者与博客`}
+>
+  <SiteHeader posts={allPosts} />
+  <main id="content" class="outer">
+    <div class="canvas">
+      <header class="pagehead">
+        <p class="eyebrow">About</p>
+        <h1 class="pagehead-title">关于</h1>
+      </header>
+
+      <div class="prose">
+        <p>
+          你好，我是 <strong>NIccoloNatukusaP</strong>。目前研究生在读，常驻西安。热爱足球与生态摄影。
+        </p>
+
+        <p>
+          这是 <strong>Niccolo's Viola Garden</strong> —— 我的个人博客。
+          这里记录我的生活、迷思，以及一些愚蠢的足球评述。
+        </p>
+
+        <h2>关于紫百合</h2>
+        <p>
+          "Viola Garden"（紫百合花园）的名字来自意甲球队佛罗伦萨（ACF Fiorentina），
+          他们的绰号"Viola"（紫百合）源于标志性的紫色球衣。从 Football Manager 22 开始，
+          我成为了这支球队的忠实球迷，见证了他们的起伏与坚持。
+        </p>
+
+        <p>
+          这个博客也如同佛罗伦萨一样：可能不够完美，但始终在前进。
+        </p>
+
+        <h2>内容分类</h2>
+        <ul>
+          <li><strong>生活</strong> — 日常随想与生活记录</li>
+          <li><strong>迷思</strong> — 思考、疑问与探索</li>
+          <li><strong>足球</strong> — 佛罗伦萨足球评述与战术分析</li>
+        </ul>
+
+        <p>
+          欢迎通过<a href="/friends/">友链页面</a>找到我常看的博客，或者订阅 <a href="/rss.xml">RSS</a> 获取更新。
+        </p>
+      </div>
+    </div>
+  </main>
+  <SiteFooter />
+</BaseLayout>
