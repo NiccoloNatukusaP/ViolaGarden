@@ -6,8 +6,7 @@ configuration:
   enablePopovers: true
   analytics: null
   locale: zh-CN
-  # TODO: 上线时改成你的最终域名
-  baseUrl: "niccolos-viola-garden.pages.dev"
+  baseUrl: "natukusa.cc"
   ignorePatterns:
     - private
     - templates
