@@ -2,9 +2,9 @@
 
 **What to build:** 将当前基于 Quartz v5 构建的博客完整迁移至 Astro 7 + Firefly 主题。访客打开重建后的博客，能看到清晰的首页、分类页、关于页与友链页；可浏览迁移过来的所有文章；可搜索内容、切换深/浅色模式、订阅 RSS；移动端正常阅读。作者在本地运行一次构建命令，即可得到一份可放心推送到 Cloudflare Pages 并在 natukusa.cc 上访问的静态站点。Viola Garden 视觉定制（紫白红配色 + 背景暗纹）推迟到部署后单独实现。
 
-**Status:** in-progress
+**Status:** ✅ completed (2026-08-17)
 
-**Updated:** 2026-08-17 - 切换主题从 Monograph 到 Firefly
+**Updated:** 2026-08-17 - 迁移完成，切换至 Firefly 主题
 
 ## Problem Statement
 
@@ -72,32 +72,42 @@
 
 ## Implementation Decisions
 
-1. **框架与技术栈**：Astro 7 + TypeScript，基于 Monograph 主题（`xocothemes/monograph`）安装。Node.js >= 18（当前 Dockerfile 锁定 v22.16.0，兼容）。
+1. **框架与技术栈**：Astro 7 + TypeScript，基于 Firefly 主题（`github.com/CuteLeaf/Firefly`）。Node.js >= 18（当前开发环境 v22）。
 
-2. **主题基础**：从 `xocothemes/monograph` 仓库克隆或通过 `npm create` 安装 Monograph 起始模板，保留其核心结构（`src/content/posts/`、`src/config/`、`src/styles/global.css`）。
+2. **主题基础**：从 `CuteLeaf/Firefly` 仓库克隆完整主题代码，保留其核心结构（`src/content/posts/`、`src/config/`、`src/components/`、`src/styles/`）。Firefly 基于 Fuwari 开发，内置搜索（Pagefind）、评论、相册、动态等功能。
 
-3. **内容目录**：`src/content/posts/`（Monograph 预期位置），每篇文章为一个 `.mdx` 文件（文件名即 slug，如 `wo-ai-zi-bai-he.mdx` → `/posts/wo-ai-zi-bai-he`）。
+3. **内容目录**：`src/content/posts/`（Firefly 标准位置），每篇文章为一个 `.md` 文件（文件名或 frontmatter `slug` 字段决定 URL，如 `wo-ai-zi-bai-he.md` + `slug: wo-ai-zi-bai-he` → `/posts/wo-ai-zi-bai-he`）。
 
 4. **URL 结构**：扁平化 `/posts/[slug]`，由 Astro content collections 自动处理——源文件目录结构不影响 URL。
 
-5. **分类系统**：分类在 `src/config/categories.ts` 中定义为枚举（如 `life`、`thoughts`、`football`），每个分类有 `key`、`name`（中文显示名）、`slug`（URL 路径）。文章 frontmatter 中 `category` 字段引用该 key，构建时强制验证（Monograph 的 `src/content.config.ts` 自带 schema 验证）。
+5. **分类系统**：Firefly 不使用预定义分类枚举，而是在 frontmatter 中直接写分类名称（`category: 足球`），系统自动聚合。中文分类名称直接使用，无需 key/slug 映射。
 
-6. **标签系统**：frontmatter 的 `tags` 字段为自由文本数组（如 `tags: ["赛后总结", "战术分析"]`），无需预定义——Astro 自动聚合所有标签并生成标签页。
+6. **标签系统**：frontmatter 的 `tags` 字段为自由文本数组（如 `tags: [赛后总结, 战术分析]`），无需预定义——Firefly 自动聚合所有标签并生成标签页。
 
-7. **Frontmatter schema**：必填字段 `title`（字符串）、`date`（ISO 8601 日期）；可选字段 `description`（摘要）、`category`（分类 key）、`tags`（标签数组）、`cover`（封面图路径）、`draft`（布尔值，默认 `false`）、`toc`（布尔值，控制目录显示）。
+7. **Frontmatter schema**：
+   - 必填：`title`（字符串）、`published`（日期，格式 YYYY-MM-DD）
+   - 可选：`description`（摘要）、`category`（分类名，中文）、`tags`（标签数组）、`image`（封面图路径）、`draft`（布尔值，默认 `false`）、`pinned`（是否置顶）、`slug`（自定义 URL slug）
 
-8. **MDX 组件**：内置组件为 Monograph 自带的 `<Callout type="note|tip|warning|danger">` 与 `<CodeGroup>`；自定义组件（如 `<Timeline>`）后续按需添加到 `src/components/` 并在 MDX 中 import 使用。
+8. **Markdown 增强语法**：
+   - Callout 提示块：使用 directive 语法 `:::note[标题]` / `:::warning` / `:::tip` / `:::danger`
+   - 代码块：支持 Expressive Code（语法高亮、行号、复制按钮、diff、高亮行等）
+   - 数学公式：KaTeX 支持（`$inline$` 和 `$$block$$`）
+   - Mermaid 图表：```mermaid 代码块
+   - 不支持 MDX 组件嵌入（Firefly 使用纯 Markdown + directive）
 
 9. **文章定制机制**：
-   - **全局开关**：通过 frontmatter 控制（`toc: false` 关闭目录、`cover: "/images/xxx.jpg"` 显示封面）。
-   - **局部定制**：在 MDX 正文中嵌入组件（如 `<Callout>`、`<Timeline>`）或用 HTML/CSS class 覆盖样式。
+   - **全局开关**：通过 frontmatter 控制（`pinned: true` 置顶、`image: "/path"` 封面图）
+   - **局部定制**：通过 Markdown directive（`:::note`、`:::warning`）和 HTML 标签（`<iframe>`）实现
 
 10. **迁移策略**：
-    - 现有 `.md` 文件手动转换为 `.mdx`（文件扩展名改为 `.mdx`）。
-    - Frontmatter 更新：保留 `title`、`date`、`tags`、`description`；新增 `category` 字段（根据原文件所在目录映射：`佛罗伦萨/` → `football`、`生活/` → `life`、`迷思/` → `thoughts`）。
+    - 现有 `.md` 文件保持 Markdown 格式（无需转为 MDX）
+    - Frontmatter 更新：
+      - 将 `date` 字段改为 `published`（Firefly 约定）
+      - 添加 `category` 字段（中文分类名，如 `category: 足球`）
+      - `tags` 数组保持不变
     - Obsidian 语法替换：
-      - `[[wikilink]]` → 普通 Markdown 链接 `[文本](/posts/slug)` 或删除（如果指向的笔记不存在）。
-      - Obsidian callout `> [!note]` → Monograph `<Callout type="note">`。
+      - `[[wikilink]]` → 普通 Markdown 链接 `[文本](/posts/slug)` 或删除
+      - Obsidian callout `> [!note]` → Firefly directive `:::note[标题]`
     - 图片路径更新：`../images/image-1.png` → Astro 的图片处理方式（放入 `public/images/` 或用 Astro Image 组件）。
     - `<iframe>` 保持不变（MDX 原生支持 HTML）。
     - 舍弃内容：`生活/欢迎.md`、`迷思/欢迎.md`（占位页面）不迁移。
@@ -118,23 +128,23 @@
     - CNAME 文件：在 `public/CNAME` 中写入 `natukusa.cc`（Astro 构建时自动复制到 `dist/CNAME`）。
     - 环境变量（如需要）：`SITE_URL=https://natukusa.cc`。
 
-16. **视觉定制（本 issue 不涵盖）**：保持 Monograph 默认样式（黑白 + 单一 ink-blue accent），Viola Garden 配色（紫色 `#7c3aed`、白色 `#ffffff`、红色 `#c62839` 点缀）与背景暗纹推迟到部署后，通过修改 `src/styles/global.css` 的 CSS 变量实现（所有颜色 token 都定义在该文件顶部）。
+16. **视觉定制（本 issue 不涵盖）**：保持 Firefly 默认样式（黑白 + 单一 ink-blue accent），Viola Garden 配色（紫色 `#7c3aed`、白色 `#ffffff`、红色 `#c62839` 点缀）与背景暗纹推迟到部署后，通过修改 `src/styles/global.css` 的 CSS 变量实现（所有颜色 token 都定义在该文件顶部）。
 
-17. **草稿机制**：Monograph 默认过滤 `draft: true` 的文章（需验证实现，可能在 `src/pages/posts/[...slug].astro` 或 content collections query 中排除）。
+17. **草稿机制**：Firefly 默认过滤 `draft: true` 的文章（需验证实现，可能在 `src/pages/posts/[...slug].astro` 或 content collections query 中排除）。
 
-18. **RSS 与 Sitemap**：Monograph 自带 RSS 与 sitemap 生成（通过 Astro 集成），配置在 `astro.config.mjs` 中，确保 `site` 字段设为 `https://natukusa.cc`。
+18. **RSS 与 Sitemap**：Firefly 自带 RSS 与 sitemap 生成（通过 Astro 集成），配置在 `astro.config.mjs` 中，确保 `site` 字段设为 `https://natukusa.cc`。
 
 19. **图标与 OG 图像**：
     - Favicon：替换 `public/favicon.ico` 与相关图标文件为紫百合主题图标（本 issue 可用占位图标，后续优化）。
-    - OG 图像：Monograph 默认生成 OG 图（需确认中文渲染效果），如有问题推迟到后续 issue 修复。
+    - OG 图像：Firefly 默认生成 OG 图（需确认中文渲染效果），如有问题推迟到后续 issue 修复。
 
 20. **中文支持**：
-    - 字体：Monograph 默认使用 `system-ui`，中文自动回退到系统字体（macOS PingFang SC、Windows Microsoft YaHei），无需额外配置。
+    - 字体：Firefly 默认使用 `system-ui`，中文自动回退到系统字体（macOS PingFang SC、Windows Microsoft YaHei），无需额外配置。
     - 界面文案：导航菜单、分类名称等通过配置文件设为中文。
 
 ## Testing Decisions
 
-**测试 seam（唯一）**：`npm run build` 构建后的 `dist/` 静态产物。这是本项目唯一的测试 seam（理想 seam 数 = 1）——与原 Quartz QA seam 相同，只是换了构建工具链。对构建产物进行外部行为验证，不测 Astro 或 Monograph 的内部实现。
+**测试 seam（唯一）**：`npm run build` 构建后的 `dist/` 静态产物。这是本项目唯一的测试 seam（理想 seam 数 = 1）——与原 Quartz QA seam 相同，只是换了构建工具链。对构建产物进行外部行为验证，不测 Astro 或 Firefly 的内部实现。
 
 **好测试的标准**：只验证外部可见行为——构建是否成功退出、页面是否渲染、内容是否正确显示、链接是否有效、功能组件（搜索、深/浅色切换、RSS）是否存在——不检查构建脚本内部细节。
 
@@ -153,7 +163,7 @@
 - 文章页面显示发布日期（frontmatter 的 `date` 字段渲染到页面）。
 - 文章页面显示标签（frontmatter 的 `tags` 字段渲染为可点击链接）。
 - 较长文章显示目录（TOC），点击目录项能跳转到对应章节（锚点链接有效）。
-- 页面上存在搜索框（Monograph 自带搜索组件），输入关键词能返回相关文章结果。
+- 页面上存在搜索框（Firefly 自带搜索组件），输入关键词能返回相关文章结果。
 - 页面工具栏存在深色 / 浅色模式切换按钮，点击后站点在两种配色间切换。
 - 站点产出 `sitemap.xml`（或 `sitemap-0.xml`），且内容为结构有效的站点地图，包含各页面地址。
 - 站点产出 RSS 订阅源（如 `rss.xml`），且内容为有效的订阅源，包含文章条目。
@@ -170,7 +180,7 @@
 
 - **Viola Garden 视觉定制**：紫色主导配色（`#7c3aed`）、白色 + 红色点缀（`#c62839`）、背景紫百合暗纹——通过修改 `src/styles/global.css` 的 CSS 变量实现，推迟到首次部署后单独优化。
 - **自定义 favicon 设计**：当前可用占位图标，正式的紫百合主题图标后续设计。
-- **OG 图像中文渲染修复**：如果 Monograph 默认 OG 图生成器对中文支持不佳，推迟到后续 issue 修复。
+- **OG 图像中文渲染修复**：如果 Firefly 默认 OG 图生成器对中文支持不佳，推迟到后续 issue 修复。
 - **评论功能（Waline）**：读者评论与互动，后续单独实现。
 - **时间线组件（`<Timeline>`）**：自定义 MDX 组件，后续按需开发。
 - **站点统计 / 访问分析（analytics）**。
@@ -181,11 +191,11 @@
 
 - **Cloudflare Pages 构建配置需更新**：登录 Cloudflare Pages 控制台，将构建命令改为 `npm run build`、输出目录改为 `dist/`、Node 版本设为 `22`（或 `18+`）。首次推送新代码后，Cloudflare 会自动触发构建。
 
-- **Monograph 版本固定**：安装时记录 Monograph 主题的 commit hash 或版本号（如通过 git submodule 或 npm package），避免上游更新破坏当前实现。
+- **Firefly 版本固定**：安装时记录 Firefly 主题的 commit hash 或版本号（如通过 git submodule 或 npm package），避免上游更新破坏当前实现。
 
-- **图片处理方式待确认**：Astro 有两种图片处理方式——放入 `public/images/` 直接引用（`/images/xxx.png`）或用 Astro Image 组件（`<Image src={import('./xxx.png')} />`）实现优化。迁移时根据 Monograph 推荐方式选择。
+- **图片处理方式待确认**：Astro 有两种图片处理方式——放入 `public/images/` 直接引用（`/images/xxx.png`）或用 Astro Image 组件（`<Image src={import('./xxx.png')} />`）实现优化。迁移时根据 Firefly 推荐方式选择。
 
-- **草稿字段名称验证**：Monograph 的草稿机制可能用 `draft` 或 `published` 字段，需查看 `src/content.config.ts` 确认——如果字段名不同，迁移时调整。
+- **草稿字段名称验证**：Firefly 的草稿机制可能用 `draft` 或 `published` 字段，需查看 `src/content.config.ts` 确认——如果字段名不同，迁移时调整。
 
 - **内容文件命名规范**：文件名即 URL slug，需遵循 kebab-case（如 `wo-ai-zi-bai-he.mdx`），避免中文文件名或空格（可能导致 URL 编码问题）。
 
@@ -197,7 +207,7 @@
   - Issue 03（示范文章）：足球分类的两篇文章在本 issue 中迁移，生活与迷思分类的文章创作推迟。
   - Issue 04（QA 验收）：被本 issue 的 Testing Decisions 替代（验收清单重写为 Astro 版本）。
 
-- **风险提示**：Monograph 是社区主题（非官方），如果上游停止维护或引入破坏性更新，需手动 fork 或切换主题。建议在项目 README 中记录 Monograph 的 commit hash 以备回溯。
+- **风险提示**：Firefly 是社区主题（非官方），如果上游停止维护或引入破坏性更新，需手动 fork 或切换主题。建议在项目 README 中记录 Firefly 的 commit hash 以备回溯。
 
 
 
