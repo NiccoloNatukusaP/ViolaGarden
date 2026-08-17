@@ -36,16 +36,37 @@
 - **Fuwari (原始项目)** 的 `.npmrc` 仅包含：`manage-package-manager-versions = true`
 - 官方 README 指出支持 Cloudflare Pages 部署
 - 没有发现关于 `ERR_PNPM_IGNORED_BUILDS` 的 Issues
+- **关键发现**：官方配置同样会触发此错误，说明问题不在 .npmrc
 
 ### pnpm 文档调研
 - pnpm CI 文档没有提及 ignored builds 的处理方法
 - 错误代码文档中没有 `ERR_PNPM_IGNORED_BUILDS` 的条目
-- 这个错误可能是 pnpm v8+ 的新安全特性
+- 这是 pnpm v8+ 的安全特性，阻止未批准的第三方包构建脚本
 
-## 下一步行动
+### 最新测试结果（2026-08-17 12:30）
+使用官方配置后，错误**依然出现**：
+```
+[ERR_PNPM_IGNORED_BUILDS] Ignored build scripts: esbuild@0.28.1, esbuild@0.28.2, workerd@1.20260811.1
+Run "pnpm approve-builds" to pick which dependencies should be allowed to run scripts.
+```
 
-### 方案 E：简化 .npmrc，参考 Fuwari 官方配置
-尝试使用最简配置：
-```
-manage-package-manager-versions = true
-```
+**重要观察**：
+- pnpm 成功安装了所有 1176 个依赖包
+- 错误发生在**安装完成之后**
+- Cloudflare Pages 将此错误视为致命错误（exit code 1）
+
+## 根本问题重新定义
+
+这不是配置问题，而是 **pnpm v8+ 的安全策略与 Cloudflare Pages 的兼容性问题**：
+
+1. pnpm 认为构建脚本被忽略只是**警告**
+2. Cloudflare Pages 将其视为**失败**（exit code 1）
+3. 官方项目可能部署在其他平台（Vercel/Netlify），它们的处理方式可能不同
+
+## 可行方案重新评估
+
+### ❌ 方案 A-D（已淘汰）
+基于 .npmrc 的配置无法解决此问题
+
+### ✅ 方案 F：生成 pnpm-approvals.json
+手动创建批准文件，预先信任这些包：
