@@ -50,7 +50,7 @@ export const siteConfig: SiteConfig = {
 
 	// 站点描述
 	description:
-		"Niccolo 的个人博客，记录生活随想、迷思探索与佛罗伦萨足球评述。紫百合花园，记录每一个瞬间。",
+		"Niccolo 的个人博客，记录生活随想、迷思探索与足球评述。紫百合花园，记录每一个瞬间。",
 
 	// 站点关键词
 	keywords: [
@@ -66,10 +66,12 @@ export const siteConfig: SiteConfig = {
 	// 主题色
 	themeColor: {
 		// 主题色的默认色相，范围从 0 到 360。例如：红色：0，青色：200，蓝绿色：250，粉色：345
-		// 紫色约 270-290
-		hue: 280,
+		// 当前值 255 对应紫色 #3F008A
+		hue: 255,
 		// 默认模式："light" 亮色，"dark" 暗色，"system" 跟随系统
 		defaultMode: "system",
+		// 自定义主色调（佛罗伦萨紫色）
+		customPrimaryColor: "#3F008A",
 	},
 
 	// 页面整体宽度（单位：rem）
@@ -90,7 +92,7 @@ export const siteConfig: SiteConfig = {
 	favicon: [
 		{
 			// 图标文件路径
-			src: "/favicon/firefly-32.png",
+			src: "/favicon/flower_trimmed.png",
 			// 可选，指定主题 'light' | 'dark'
 			// theme: "light",
 			// 可选，图标大小
@@ -102,14 +104,14 @@ export const siteConfig: SiteConfig = {
 	navbar: {
 		// 导航栏Logo
 		logo: {
-			type: "icon",
-			value: "material-symbols:home-pin-outline",
+			type: "image",
+			value: "assets/images/flower_trimmed.png",
 			alt: "🍀",
 		},
 		// 导航栏标题
 		title: "Viola Garden",
 		// 全宽导航栏，导航栏是否占满屏幕宽度
-		widthFull: false,
+		widthFull: true,
 		// 导航菜单对齐方式，left：左对齐，center：居中
 		menuAlign: "center",
 		// 导航栏图标和标题是否跟随主题色
@@ -148,7 +150,7 @@ export const siteConfig: SiteConfig = {
 		// 默认布局模式："list" 列表模式（单列布局），"grid" 网格模式（多列布局）
 		defaultMode: "list",
 		// 移动端默认布局模式，不设置则跟随 defaultMode
-		mobileDefaultMode: "grid",
+		mobileDefaultMode: "list",
 		// 列表模式下封面图显示在哪一侧："right" 右侧，"left" 左侧
 		// 网格模式的封面固定在卡片顶部，不受此项影响
 		coverPosition: "right",
@@ -231,7 +233,7 @@ export const siteConfig: SiteConfig = {
 	// ── Bilibili配置 ──────────────────────────────────
 	bilibili: {
 		// 你的 Bilibili 用户 UID
-		uid: "38932988",
+		uid: "351568363",
 	},
 
 	// ── 番组计划bangumi配置 ──────────────────────────────────

@@ -37,6 +37,9 @@ export type SiteConfig = {
 	themeColor: {
 		hue: number;
 		defaultMode?: LIGHT_DARK_MODE; // 默认模式：浅色、深色或跟随系统
+		// 自定义主色调（可选），支持 hex 或 rgb 格式，如 "#3F008A" 或 "rgb(63, 0, 138)"
+		// 设置后将覆盖基于 hue 生成的主色调
+		customPrimaryColor?: string;
 	};
 
 	// 页面整体宽度（单位：rem）
